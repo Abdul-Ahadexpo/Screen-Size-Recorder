@@ -74,13 +74,19 @@
           <span class="font-semibold text-yellow-300">Network Type:</span> <span id="network-type"
             class="text-gray-300">Loading...</span>
         </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Camera Quality/MP:</span> <span id="camera-quality"
+            class="text-gray-300">No camera</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">RAM/Rom:</span> <span id="ram-rom"
+            class="text-gray-300">Loading...</span>
+        </div>
       </div>
       <button id="copy-device-info" class="btn btn-info mt-4 w-full">Copy Info to Clipboard</button>
       <button id="close-popup" class="btn btn-accent mt-4 w-full">Close</button>
     </div>
   </div>
-
-
 
   <script>
     const screenWidthSpan = document.getElementById('screen-width');
@@ -105,6 +111,8 @@
     const closePopupButton = document.getElementById('close-popup');
     const deviceType = document.getElementById('device-type');
     const networkType = document.getElementById('network-type');
+    const cameraQuality = document.getElementById('camera-quality');
+    const ramRom = document.getElementById('ram-rom');
     const copyDeviceInfoButton = document.getElementById('copy-device-info');
 
     function updateScreenSize() {
@@ -160,6 +168,27 @@
         networkType.textContent = 'Not Available';
       }
 
+      // Camera Quality
+      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+          const camera = devices.find(device => device.kind === 'videoinput');
+          if (camera) {
+            cameraQuality.textContent = "Available (Quality Unknown)";
+          } else {
+            cameraQuality.textContent = "No camera";
+          }
+        });
+      } else {
+        cameraQuality.textContent = "No camera";
+      }
+
+      // RAM/ROM (approximate)
+      if ('deviceMemory' in navigator) {
+        ramRom.textContent = `${navigator.deviceMemory} GB`;
+      } else {
+        ramRom.textContent = 'Not Available';
+      }
+
       deviceInfoPopup.classList.remove('hidden');
     }
 
@@ -172,6 +201,8 @@
       Language: ${languageInfo.textContent}
       Online Status: ${onlineStatus.textContent}
       Battery Level: ${batteryLevel.textContent}
+      Camera Quality/MP: ${cameraQuality.textContent}
+      RAM/ROM: ${ramRom.textContent}
       Timezone: ${timezoneInfo.textContent}
       Device Type: ${deviceType.textContent}
       Network Type: ${networkType.textContent}
@@ -182,22 +213,6 @@
       });
     }
 
-    let lastGradientIndex = -1;
-
-    function changeBackgroundGradient() {
-      const gradients = [
-        'bg-gradient-to-br from-blue-500 to-blue-100',
-        'bg-gradient-to-br from-gray-500 to-gray-100',
-        'bg-gradient-to-br from-black to-gray-600'
-      ];
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * gradients.length);
-      } while (randomIndex === lastGradientIndex);
-      lastGradientIndex = randomIndex;
-      body.className = `min-h-screen flex items-center justify-center ${gradients[randomIndex]}`;
-    }
-
     closePopupButton.addEventListener('click', () => {
       deviceInfoPopup.classList.add('hidden');
     });
@@ -205,19 +220,12 @@
     copyDeviceInfoButton.addEventListener('click', copyDeviceInfo);
     deviceInfoButton.addEventListener('click', showDeviceInfo);
 
-    closePopupButton.addEventListener('click', () => {
-      deviceInfoPopup.classList.add('hidden');
-    });
-
-    copySizeButton.addEventListener('click', copyScreenSize);
-    changeBgButton.addEventListener('click', changeBackgroundGradient);
-    deviceInfoButton.addEventListener('click', showDeviceInfo);
-
     window.addEventListener('resize', updateScreenSize);
     window.addEventListener('mousemove', updateMouseCoordinates);
     updateScreenSize();
     setInterval(updateTime, 1000);
   </script>
+
 
 
 
