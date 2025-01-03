@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen Size Recorder</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-purple-600 to-blue-500 min-h-screen flex items-center justify-center">
+  <div class="card w-full max-w-md bg-gray-900 shadow-xl transform transition-transform hover:scale-105 duration-300">
+    <div class="card-body items-center p-4">
+      <h2 class="card-title text-center text-2xl font-bold text-white">Screen Size Recorder</h2>
+      <p class="text-center text-gray-300" id="screen-size">
+        Width: <span id="screen-width"></span> px<br>
+        Height: <span id="screen-height"></span> px
+      </p>
+      <p class="text-center text-yellow-300" id="screen-orientation"></p>
+      <p class="text-center text-yellow-300" id="mouse-coordinates"></p>
+      <p class="text-center text-yellow-300" id="current-time"></p>
+      <div class="card-actions justify-center mt-4">
+        <button class="btn btn-info ml-2" id="copy-size">Copy Screen Size</button>
+        <button class="btn btn-warning ml-2" id="change-bg">Change Background Gradient</button>
+        <button class="btn btn-success ml-2" id="device-info">Show Device Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup card for device info -->
+  <div id="device-info-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+    <div
+      class="card w-96 h-fit bg-gray-800 text-white p-6 shadow-xl rounded-lg fixed inset-0 flex justify-center items-center m-auto">
+      <h3 class="text-2xl font-semibold mb-6 text-center text-blue-400">Device Information</h3>
+      <div class="space-y-4 text-sm">
+        <div>
+          <span class="font-semibold text-yellow-300">Device Name:</span> <span id="device-name"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Operating System:</span> <span id="os-name"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Screen Width:</span> <span id="screen-width-info"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Screen Height:</span> <span id="screen-height-info"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Language:</span> <span id="language-info"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Online Status:</span> <span id="online-status"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Battery Level:</span> <span id="battery-level"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Timezone:</span> <span id="timezone-info"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Device Type:</span> <span id="device-type"
+            class="text-gray-300">Loading...</span>
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-300">Network Type:</span> <span id="network-type"
+            class="text-gray-300">Loading...</span>
+        </div>
+      </div>
+      <button id="copy-device-info" class="btn btn-info mt-4 w-full">Copy Info to Clipboard</button>
+      <button id="close-popup" class="btn btn-accent mt-4 w-full">Close</button>
+    </div>
+  </div>
+
+
+
+  <script>
+    const screenWidthSpan = document.getElementById('screen-width');
+    const screenHeightSpan = document.getElementById('screen-height');
+    const screenOrientation = document.getElementById('screen-orientation');
+    const mouseCoordinates = document.getElementById('mouse-coordinates');
+    const copySizeButton = document.getElementById('copy-size');
+    const changeBgButton = document.getElementById('change-bg');
+    const deviceInfoButton = document.getElementById('device-info');
+    const currentTimeElement = document.getElementById('current-time');
+    const body = document.body;
+
+    const deviceInfoPopup = document.getElementById('device-info-popup');
+    const deviceName = document.getElementById('device-name');
+    const osName = document.getElementById('os-name');
+    const screenWidthInfo = document.getElementById('screen-width-info');
+    const screenHeightInfo = document.getElementById('screen-height-info');
+    const languageInfo = document.getElementById('language-info');
+    const onlineStatus = document.getElementById('online-status');
+    const batteryLevel = document.getElementById('battery-level');
+    const timezoneInfo = document.getElementById('timezone-info');
+    const closePopupButton = document.getElementById('close-popup');
+    const deviceType = document.getElementById('device-type');
+    const networkType = document.getElementById('network-type');
+    const copyDeviceInfoButton = document.getElementById('copy-device-info');
+
+
+    function updateScreenSize() {
+      screenWidthSpan.textContent = window.innerWidth;
+      screenHeightSpan.textContent = window.innerHeight;
+      screenOrientation.textContent = `Orientation: ${window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait'}`;
+    }
+
+    function updateMouseCoordinates(event) {
+      mouseCoordinates.textContent = `Mouse: X=${event.clientX}, Y=${event.clientY}`;
+    }
+
+    function updateTime() {
+      const now = new Date();
+      currentTimeElement.textContent = `Current Time: ${now.toLocaleTimeString()}`;
+    }
+
+    function copyScreenSize() {
+      const sizeText = `Width: ${window.innerWidth}px, Height: ${window.innerHeight}px`;
+      navigator.clipboard.writeText(sizeText).then(() => {
+        alert('Screen size copied to clipboard!');
+      });
+    }
+
+    function showDeviceInfo() {
+      // Existing data
+      deviceName.textContent = navigator.userAgent;
+      osName.textContent = navigator.platform;
+      screenWidthInfo.textContent = `${window.innerWidth}px`;
+      screenHeightInfo.textContent = `${window.innerHeight}px`;
+      languageInfo.textContent = navigator.language;
+      onlineStatus.textContent = navigator.onLine ? 'Online' : 'Offline';
+
+      // Battery Level
+      if (navigator.getBattery) {
+        navigator.getBattery().then(battery => {
+          batteryLevel.textContent = `${(battery.level * 100).toFixed(0)}%`;
+        });
+      } else {
+        batteryLevel.textContent = 'Not Available';
+      }
+
+      // Timezone
+      timezoneInfo.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // New Information: Device Type and Network Type
+      deviceType.textContent = navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Device';
+
+      // Network Type (checking the connection)
+      if (navigator.connection) {
+        networkType.textContent = navigator.connection.effectiveType || 'Unknown';
+      } else {
+        networkType.textContent = 'Not Available';
+      }
+
+      deviceInfoPopup.classList.remove('hidden');
+    }
+
+    function copyDeviceInfo() {
+      const deviceInfoText = `
+    Device Name: ${deviceName.textContent}
+    Operating System: ${osName.textContent}
+    Screen Width: ${screenWidthInfo.textContent}
+    Screen Height: ${screenHeightInfo.textContent}
+    Language: ${languageInfo.textContent}
+    Online Status: ${onlineStatus.textContent}
+    Battery Level: ${batteryLevel.textContent}
+    Timezone: ${timezoneInfo.textContent}
+    Device Type: ${deviceType.textContent}
+    Network Type: ${networkType.textContent}
+  `;
+
+      navigator.clipboard.writeText(deviceInfoText).then(() => {
+        alert('Device information copied to clipboard!');
+      });
+    }
+
+    closePopupButton.addEventListener('click', () => {
+      deviceInfoPopup.classList.add('hidden');
+    });
+
+    copyDeviceInfoButton.addEventListener('click', copyDeviceInfo);
+    deviceInfoButton.addEventListener('click', showDeviceInfo);
+
+
+
+
+
+
+
+
+
+    closePopupButton.addEventListener('click', () => {
+      deviceInfoPopup.classList.add('hidden');
+    });
+
+    copySizeButton.addEventListener('click', copyScreenSize);
+    changeBgButton.addEventListener('click', changeBackgroundGradient);
+    deviceInfoButton.addEventListener('click', showDeviceInfo);
+
+    window.addEventListener('resize', updateScreenSize);
+    window.addEventListener('mousemove', updateMouseCoordinates);
+    updateScreenSize();
+    setInterval(updateTime, 1000);
+  </script>
+</body>
+
+</html>
